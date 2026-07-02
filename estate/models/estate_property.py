@@ -1,4 +1,3 @@
-# from ....odoo.odoo import fields, models
 from odoo import fields, models
 
 class EstateProperty(models.Model):
