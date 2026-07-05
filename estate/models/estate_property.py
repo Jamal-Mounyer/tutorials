@@ -1,4 +1,5 @@
 from odoo import fields, models, api
+from odoo.exceptions import UserError
 from dateutil.relativedelta import relativedelta
 
 class EstateProperty(models.Model):
@@ -27,6 +28,19 @@ class EstateProperty(models.Model):
         else:
             self.garden_area = 0
             self.garden_orientation = ''
+
+
+    def sell_property(self):
+        if self.state != 'Canceled':
+            self.state = 'Sold'
+        else:
+            raise UserError('Canceled properties cannot be sold.')
+    
+    def cancel_selling(self):
+        if self.state != 'Sold':
+            self.state = 'Canceled'
+        else:
+            raise UserError('Sold properties cannot be canceled.')
 
 
 #Relational fields
@@ -68,11 +82,12 @@ class EstateProperty(models.Model):
     
     active = fields.Boolean(default = True)
     state = fields.Selection(required = True,
+                             string = 'status',
                              copy = False,
                              default = 'New',
                              selection = [('New', 'new'), 
                                           ('Offer Received', 'Offer Received'),
                                           ('Offer Accepted', 'Offer Accepted'), 
                                           ('Sold', 'sold'),
-                                          ('Cancelled', 'Cancelled')])
+                                          ('Canceled', 'Canceled')])
 
