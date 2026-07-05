@@ -9,7 +9,18 @@ class EstateProperty(models.Model):
     def _default_date_availability(self):
         return fields.Date.today() + relativedelta(months=3)
 
+#Relational fields
+    property_type_id = fields.Many2one(comodel_name = 'estate.property.type',
+                                    string = 'Property Type')
+    buyer = fields.Many2one(comodel_name = 'res.users',
+                            string = 'Buyer', copy = False)
+    salesperson = fields.Many2one(comodel_name = 'res.partner',
+                                  string = 'Salesman', default = lambda self: self.env.user)
+    tag_ids = fields.Many2many(comodel_name = 'estate.property.tag',
+                               string = 'Tags')
+    offer_ids = fields.One2many('estate.property.offer', inverse_name = 'property_id')
 
+#Normal fields
     name = fields.Char(required = True, string = 'Title')
     description = fields.Text(string = 'Description')
     postcode = fields.Char(string = 'Postcode')
@@ -37,3 +48,4 @@ class EstateProperty(models.Model):
                                           ('Offer Accepted', 'Offer Accepted'), 
                                           ('Sold', 'sold'),
                                           ('Cancelled', 'Cancelled')])
+
