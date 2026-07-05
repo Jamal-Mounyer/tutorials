@@ -1,10 +1,17 @@
 from odoo import fields, models, api
 from datetime import timedelta
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 class EstateProperty(models.Model):
     _name = 'estate.property.offer'
     _description = 'Real Estate Property Offer'
+
+    @api.constrains('price')
+    def _check_offer_price(self):
+        for record in self:
+            if record.price < 0.9 * record.property_id.expected_price:
+                raise ValidationError('The offered price shouldn\'t be less than 90% \of the property expected price.')
+
 
     @api.depends('validity', 'create_date')
     def _compute_deadline_date(self):
@@ -56,3 +63,8 @@ class EstateProperty(models.Model):
                                            ('Accepted', 'Accepted'),
                                            ('Refused', 'Refused')])
     
+#Constraints
+    _sql_constraints =[
+        ('positive_offer_price', 'CHECK(price >= 0)', 
+        'The offer price shouldn\'t be negative.'),
+    ]
