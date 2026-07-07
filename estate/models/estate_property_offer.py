@@ -49,7 +49,7 @@ class EstateProperty(models.Model):
                 ], limit=1)
         '''
         self.status = 'Accepted'
-        self.property_id.buyer = self.env.user
+        self.property_id.buyer = self.partner_id
         self.property_id.selling_price = self.price
         self.property_id.state = 'Offer Accepted'
 

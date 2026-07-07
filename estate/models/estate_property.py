@@ -39,7 +39,7 @@ class EstateProperty(models.Model):
     @api.constrains('selling_price', 'expected_price')
     def _check_selling_price(self):
         for record in self:
-            if record.selling_price < 0.9 * record.expected_price:
+            if record.selling_price < 0.9 * record.expected_price and record.selling_price != 0:
                 raise ValidationError('The selling price shouldn\'t be less than 90% of the expected price.')
 
     def sell_property(self):
@@ -58,9 +58,9 @@ class EstateProperty(models.Model):
 #Relational fields
     property_type_id = fields.Many2one(comodel_name = 'estate.property.type',
                                     string = 'Property Type')
-    buyer = fields.Many2one(comodel_name = 'res.users',
+    buyer = fields.Many2one(comodel_name = 'res.partner',
                             string = 'Buyer', copy = False)
-    salesperson = fields.Many2one(comodel_name = 'res.partner',
+    salesperson = fields.Many2one(comodel_name = 'res.users',
                                   string = 'Salesman', default = lambda self: self.env.user)
     tag_ids = fields.Many2many(comodel_name = 'estate.property.tag',
                                string = 'Tags')

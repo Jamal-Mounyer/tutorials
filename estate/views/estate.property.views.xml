@@ -39,8 +39,7 @@
                 <field name="name" string="Title" />
                 <field name="property_type_id" />
                 <field name="postcode" string="Postcode" />
-                <field
-                    name="tag_ids" widget="many2many_tags"
+                <field name="tag_ids" widget="many2many_tags"
                     options="{'color_field': 'color'}" />
                 <field name="bedrooms" string="Bedrooms" />
                 <field
@@ -48,8 +47,8 @@
                 <field name="expected_price"
                     string="Expected Price" />
                 <field name="selling_price" string="Selling Price" />
-                <field
-                    name="date_availability" string="Available From" optional="true" />
+                <field name="date_availability"
+                    string="Available From" optional="true" />
             </list>
         </field>
     </record>
@@ -103,8 +102,7 @@
                             </group>
                         </page>
                         <page string="Offers">
-                            <field name="offer_ids"
-                            />
+                            <field name="offer_ids" />
                         </page>
                         <page string="Other Info">
                             <group>
