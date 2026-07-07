@@ -5,12 +5,22 @@ from odoo.exceptions import UserError, ValidationError
 class EstateProperty(models.Model):
     _name = 'estate.property.offer'
     _description = 'Real Estate Property Offer'
+    _order = 'price desc'
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+
+        for record in records:
+            record.property_id.state = 'Offer Received'
+
+        return records
 
     @api.constrains('price')
     def _check_offer_price(self):
         for record in self:
             if record.price < 0.9 * record.property_id.expected_price:
-                raise ValidationError('The offered price shouldn\'t be less than 90% \of the property expected price.')
+                raise ValidationError('The offered price shouldn\'t be less than 90% of the property expected price.')
 
 
     @api.depends('validity', 'create_date')
@@ -36,10 +46,11 @@ class EstateProperty(models.Model):
         self.status = 'Accepted'
         self.property_id.buyer = self.env.user
         self.property_id.selling_price = self.price
+        self.property_id.state = 'Offer Accepted'
 
 
     def reject_offer(self):
-        if self.stat != 'Accepted':
+        if self.status != 'Accepted':
             self.status = 'Refused'
         else:
             raise UserError('You cannot cancel your payment.')
@@ -48,6 +59,8 @@ class EstateProperty(models.Model):
 #Relational fields
     partner_id = fields.Many2one('res.partner', required = True)
     property_id = fields.Many2one('estate.property', required = True)
+    property_type_id = fields.Many2one(related='property_id.property_type_id', store=True)
+    
 
 #Computed fields
     validity = fields.Integer(string = 'Validity (days)', default = 7)

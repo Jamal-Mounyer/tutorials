@@ -5,6 +5,7 @@ from dateutil.relativedelta import relativedelta
 class EstateProperty(models.Model):
     _name = 'estate.property'
     _description = 'Real Estate Property'
+    _order = 'id desc'
 
     @staticmethod
     def _default_date_availability(self):
@@ -33,7 +34,7 @@ class EstateProperty(models.Model):
     def _check_selling_price(self):
         for record in self:
             if record.selling_price < 0.9 * record.expected_price:
-                raise ValidationError('The selling price shouldn\'t be less than 90% \of the expected price.')
+                raise ValidationError('The selling price shouldn\'t be less than 90% of the expected price.')
 
     def sell_property(self):
         if self.state != 'Canceled':

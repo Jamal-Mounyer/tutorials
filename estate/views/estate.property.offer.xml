@@ -4,7 +4,9 @@
         <field name="name">estate.property.offer.list</field>
         <field name="model">estate.property.offer</field>
         <field name="arch" type="xml">
-            <list string="Offers">
+            <list string="Offers" editable="bottom"
+                decoration-danger="status == 'Refused'"
+                decoration-success="status == 'Accepted'">
                 <field name="price" />
                 <field name="partner_id" />
                 <field name="validity" />
@@ -12,12 +14,13 @@
                 <button name="accept_offer"
                     string=" "
                     type="object"
-                    icon="fa-check" />
+                    icon="fa-check"
+                    invisible="status == 'Accepted' or status == 'Refused'" />
                 <button name="reject_offer"
                     string=" "
                     type="object"
-                    icon="fa-times" />
-                <field name="status" />
+                    icon="fa-times"
+                    invisible="status == 'Accepted' or status == 'Refused'" />
             </list>
         </field>
     </record>
@@ -28,7 +31,7 @@
         <field name="arch" type="xml">
             <form>
                 <sheet>
-                    <group>
+                    <group readonly="property_id.state in ['Offer Accepted', 'Sold', 'Canceled']">
                         <field name="price" />
                         <field name="partner_id" />
                         <field name="validity" />
