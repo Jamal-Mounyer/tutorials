@@ -6,54 +6,10 @@ class EstateProperty(models.Model):
     _name = 'estate.property'
     _description = 'Real Estate Property'
     _order = 'id desc'
-
-    @api.ondelete(at_uninstall=False)
-    def _unlink_if_not_valid_state(self):
-        for record in self:
-            if record.state not in ['New', 'Canceled']:
-                raise UserError("Property must be new or canceled to delete it.")
-
+    
     @staticmethod
     def _default_date_availability(self):
         return fields.Date.today() + relativedelta(months=3)
-    
-    @api.depends('living_area', 'garden_area')
-    def _compute_total_area(self):
-        for property in self:
-            property.total_area = property.living_area + property.garden_area
-
-    @api.depends('offer_ids.price')
-    def _compute_best_price(self):
-        for record in self:
-            record.best_price = max([offer.price for offer in record.offer_ids] or [0])
-
-    @api.onchange('garden')
-    def _onchange_garden(self):
-        if self.garden:
-            self.garden_area = 10
-            self.garden_orientation = 'North'
-        else:
-            self.garden_area = 0
-            self.garden_orientation = ''
-
-    @api.constrains('selling_price', 'expected_price')
-    def _check_selling_price(self):
-        for record in self:
-            if record.selling_price < 0.9 * record.expected_price and record.selling_price != 0:
-                raise ValidationError('The selling price shouldn\'t be less than 90% of the expected price.')
-
-    def sell_property(self):
-        if self.state != 'Canceled':
-            self.state = 'Sold'
-        else:
-            raise UserError('Canceled properties cannot be sold.')
-    
-    def cancel_selling(self):
-        if self.state != 'Sold':
-            self.state = 'Canceled'
-        else:
-            raise UserError('Sold properties cannot be canceled.')
-
 
 #Relational fields
     property_type_id = fields.Many2one(comodel_name = 'estate.property.type',
@@ -110,3 +66,50 @@ class EstateProperty(models.Model):
         ('positive_selling_price', 'CHECK(selling_price >= 0)', 
         'The selling price shouldn\'t be negative.'),
     ]
+
+
+
+    @api.depends('living_area', 'garden_area')
+    def _compute_total_area(self):
+        for property in self:
+            property.total_area = property.living_area + property.garden_area
+
+    @api.depends('offer_ids.price')
+    def _compute_best_price(self):
+        for record in self:
+            record.best_price = max([offer.price for offer in record.offer_ids] or [0])
+
+    @api.constrains('selling_price', 'expected_price')
+    def _check_selling_price(self):
+        for record in self:
+            if record.selling_price < 0.9 * record.expected_price and record.selling_price != 0:
+                raise ValidationError('The selling price shouldn\'t be less than 90% of the expected price.')
+
+    @api.onchange('garden')
+    def _onchange_garden(self):
+        if self.garden:
+            self.garden_area = 10
+            self.garden_orientation = 'North'
+        else:
+            self.garden_area = 0
+            self.garden_orientation = ''
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_not_valid_state(self):
+        for record in self:
+            if record.state not in ['New', 'Canceled']:
+                raise UserError("Property must be new or canceled to delete it.")
+
+    def action_sell_property(self):
+        self.ensure_one()
+        if self.state != 'Canceled':
+            self.state = 'Sold'
+        else:
+            raise UserError('Canceled properties cannot be sold.')
+    
+    def action_cancel_selling(self):
+        self.ensure_one()
+        if self.state != 'Sold':
+            self.state = 'Canceled'
+        else:
+            raise UserError('Sold properties cannot be canceled.')

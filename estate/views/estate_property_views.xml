@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <odoo>
-    <record id="estate_property_search_view" model="ir.ui.view">
+    <record id="estate_property_view_search" model="ir.ui.view">
         <field name="name">estate.property.search</field>
         <field name="model">estate.property</field>
         <field name="arch" type="xml">
@@ -28,7 +28,7 @@
         </field>
     </record>
 
-    <record id="estate_property_list_view" model="ir.ui.view">
+    <record id="estate_property_view_list" model="ir.ui.view">
         <field name="name">estate.property.list</field>
         <field name="model">estate.property</field>
         <field name="arch" type="xml">
@@ -53,7 +53,7 @@
         </field>
     </record>
 
-    <record id="estate_property_kanban_view" model="ir.ui.view">
+    <record id="estate_property_view_kanban" model="ir.ui.view">
         <field name="name">estate.property.kanban</field>
         <field name="model">estate.property</field>
         <field name="arch" type="xml">
@@ -91,15 +91,15 @@
         </field>
     </record>
 
-    <record id="estate_property_form_view" model="ir.ui.view">
+    <record id="estate_property_view_form" model="ir.ui.view">
         <field name="name">estate.property.form</field>
         <field name="model">estate.property</field>
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="sell_property" type="object" string="SOLD"
+                    <button name="action_sell_property" type="object" string="SOLD"
                         invisible="state == 'Sold' or state == 'Canceled'" />
-                    <button name="cancel_selling" type="object" string="CANCEL"
+                    <button name="action_cancel_selling" type="object" string="CANCEL"
                         invisible="state == 'Sold' or state == 'Canceled'" />
                     <field name="state" widget="statusbar"
                         statusbar_visible="New,Offer Received,Offer Accepted,Sold" />

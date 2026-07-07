@@ -7,60 +7,6 @@ class EstateProperty(models.Model):
     _description = 'Real Estate Property Offer'
     _order = 'price desc'
 
-    @api.model
-    def create(self, vals):
-        property = self.env['estate.property'].browse(vals['property_id'])
-        for offer in property.offer_ids:
-            if vals['price'] < offer.price:
-                raise UserError('You cannot create an offer with a lower amount than an existing offer.')
-
-        records = super().create(vals)
-
-        for record in records:
-            record.property_id.state = 'Offer Received'
-
-        return records
-
-    @api.constrains('price')
-    def _check_offer_price(self):
-        for record in self:
-            if record.price < 0.9 * record.property_id.expected_price:
-                raise ValidationError('The offered price shouldn\'t be less than 90% of the property expected price.')
-
-
-    @api.depends('validity', 'create_date')
-    def _compute_deadline_date(self):
-        for record in self:
-            record.date_deadline = record.create_date + timedelta(days=record.validity)
-
-    def _inverse_deadline_date(self):
-        for record in self:
-            record.validity = (record.date_deadline - record.create_date).days
-
-    def accept_offer(self):
-        '''
-            I have searched for ways to accept only one offer
-            but didn't implement it because I thought that it's
-            out of the tutorial
-            EX: accepted_offer = self.env['estate.property.offer'].search([
-                    ('property_id', '=', self.property_id.id),
-                    ('status', '=', 'accepted'),
-                    ('id', '!=', self.id),
-                ], limit=1)
-        '''
-        self.status = 'Accepted'
-        self.property_id.buyer = self.partner_id
-        self.property_id.selling_price = self.price
-        self.property_id.state = 'Offer Accepted'
-
-
-    def reject_offer(self):
-        if self.status != 'Accepted':
-            self.status = 'Refused'
-        else:
-            raise UserError('You cannot cancel your payment.')
-
-
 #Relational fields
     partner_id = fields.Many2one('res.partner', required = True)
     property_id = fields.Many2one('estate.property', required = True)
@@ -86,3 +32,58 @@ class EstateProperty(models.Model):
         ('positive_offer_price', 'CHECK(price >= 0)', 
         'The offer price shouldn\'t be negative.'),
     ]
+
+    
+    @api.depends('validity', 'create_date')
+    def _compute_deadline_date(self):
+        for record in self:
+            record.date_deadline = record.create_date + timedelta(days=record.validity)
+
+    def _inverse_deadline_date(self):
+        for record in self:
+            record.validity = (record.date_deadline - record.create_date).days
+
+    @api.constrains('price')
+    def _check_offer_price(self):
+        for record in self:
+            if record.price < 0.9 * record.property_id.expected_price:
+                raise ValidationError('The offered price shouldn\'t be less than 90% of the property expected price.')
+
+    @api.model
+    def create(self, vals):
+        property = self.env['estate.property'].browse(vals['property_id'])
+        for offer in property.offer_ids:
+            if vals['price'] < offer.price:
+                raise UserError('You cannot create an offer with a lower amount than an existing offer.')
+
+        records = super().create(vals)
+
+        for record in records:
+            record.property_id.state = 'Offer Received'
+
+        return records
+
+    def action_accept_offer(self):
+        '''
+            I have searched for ways to accept only one offer
+            but didn't implement it because I thought that it's
+            out of the tutorial
+            EX: accepted_offer = self.env['estate.property.offer'].search([
+                    ('property_id', '=', self.property_id.id),
+                    ('status', '=', 'accepted'),
+                    ('id', '!=', self.id),
+                ], limit=1)
+        '''
+        self.ensure_one()
+        self.status = 'Accepted'
+        self.property_id.buyer = self.partner_id
+        self.property_id.selling_price = self.price
+        self.property_id.state = 'Offer Accepted'
+
+
+    def action_reject_offer(self):
+        self.ensure_one()
+        if self.status != 'Accepted':
+            self.status = 'Refused'
+        else:
+            raise UserError('You cannot cancel your payment.')
