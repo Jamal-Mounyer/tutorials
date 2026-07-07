@@ -7,6 +7,12 @@ class EstateProperty(models.Model):
     _description = 'Real Estate Property'
     _order = 'id desc'
 
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_not_valid_state(self):
+        for record in self:
+            if record.state not in ['New', 'Canceled']:
+                raise UserError("Property must be new or canceled to delete it.")
+
     @staticmethod
     def _default_date_availability(self):
         return fields.Date.today() + relativedelta(months=3)

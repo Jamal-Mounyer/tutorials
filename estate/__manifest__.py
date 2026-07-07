@@ -11,6 +11,6 @@
         'views/estate.property.offer.xml',
         'views/estate.property.type.xml',
         'views/estate.property.menus.xml',
-        
+        'views/base.view.users.form.xml',
     ]
 }

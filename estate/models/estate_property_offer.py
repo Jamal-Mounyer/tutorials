@@ -7,9 +7,14 @@ class EstateProperty(models.Model):
     _description = 'Real Estate Property Offer'
     _order = 'price desc'
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        records = super().create(vals_list)
+    @api.model
+    def create(self, vals):
+        property = self.env['estate.property'].browse(vals['property_id'])
+        for offer in property.offer_ids:
+            if vals['price'] < offer.price:
+                raise UserError('You cannot create an offer with a lower amount than an existing offer.')
+
+        records = super().create(vals)
 
         for record in records:
             record.property_id.state = 'Offer Received'
